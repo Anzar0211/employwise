@@ -16,7 +16,7 @@ const Login = () => {
     setError(""); 
     try {
       const { data } = await login({ email, password });
-      if(password!=="cityslicka"){
+      if(email === "eve.holt@reqres.in" && password!=="cityslicka"){
         setError("Invalid credentials. Try again!");
         setLoading(false);
         return;
@@ -102,7 +102,7 @@ const Login = () => {
           </button>
           <p className="mt-4">
             Don&apos;t have an account?{" "}
-            <Link to="/register" className="text-blue-500 underline">
+            <Link to="/" className="text-blue-500 underline">
               Register
             </Link>
           </p>

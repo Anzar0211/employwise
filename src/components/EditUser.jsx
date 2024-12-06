@@ -1,45 +1,62 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { fetchUsers, updateUser } from '../api/api';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { fetchUsers } from "../api/api";
 
 const EditUser = () => {
   const { id } = useParams();
   const [user, setUser] = useState({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await fetchUsers(1);
-        const selectedUser = data.data.find((u) => u.id === parseInt(id));
-        if (selectedUser) setUser(selectedUser);
-        else setError('User not found');
-      } catch {
-        setError('Failed to load user details.');
+        const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+        const existingUser = storedUsers.find((u) => u.id === parseInt(id));
+
+        if (existingUser) {
+          setUser(existingUser);
+        } else {
+          const { data } = await fetchUsers(1);
+          const selectedUser = data.data.find((u) => u.id === parseInt(id));
+          if (selectedUser) {
+            setUser(selectedUser);
+          } else {
+            setError("User not found");
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setError("Failed to load user details.");
       }
     };
+
     fetchData();
   }, [id]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const updatedData = {
-        name: `${user.first_name} ${user.last_name}`,
+      const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+      const updatedUser = {
+        id: user.id,
+        avatar: user.avatar, 
+        first_name: user.first_name,
+        last_name: user.last_name,
         email: user.email,
       };
 
-      console.log("Submitting data:", updatedData);
-      const response = await updateUser(id, updatedData);
-      console.log("API Response:", response.data);
+      const updatedUsers = storedUsers.map((u) =>
+        u.id === user.id ? updatedUser : u
+      );
 
-      navigate('/users');
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
+      navigate("/users");
     } catch (error) {
-      console.error("Error updating user:", error.message);
-      setError('Failed to update user.');
+      console.error("Error updating user:", error);
+      setError("Failed to update user.");
     } finally {
       setLoading(false);
     }
@@ -58,7 +75,7 @@ const EditUser = () => {
             <input
               id="first_name"
               type="text"
-              value={user.first_name || ''}
+              value={user.first_name || ""}
               onChange={(e) => setUser({ ...user, first_name: e.target.value })}
               className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
               required
@@ -71,7 +88,7 @@ const EditUser = () => {
             <input
               id="last_name"
               type="text"
-              value={user.last_name || ''}
+              value={user.last_name || ""}
               onChange={(e) => setUser({ ...user, last_name: e.target.value })}
               className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
               required
@@ -84,7 +101,7 @@ const EditUser = () => {
             <input
               id="email"
               type="email"
-              value={user.email || ''}
+              value={user.email || ""}
               onChange={(e) => setUser({ ...user, email: e.target.value })}
               className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
               required
@@ -93,7 +110,7 @@ const EditUser = () => {
           <div className="flex items-center justify-between">
             <button
               type="button"
-              onClick={() => navigate('/users')}
+              onClick={() => navigate("/users")}
               className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md"
             >
               Cancel
@@ -103,8 +120,8 @@ const EditUser = () => {
               disabled={loading}
               className={`py-2 px-4 rounded-md font-bold ${
                 loading
-                  ? 'bg-blue-400 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-600 text-white"
               }`}
             >
               {loading ? (
@@ -129,7 +146,7 @@ const EditUser = () => {
                   ></path>
                 </svg>
               ) : (
-                'Save'
+                "Save"
               )}
             </button>
           </div>

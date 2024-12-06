@@ -6,7 +6,7 @@ import EditUser from './components/EditUser';
 import UserCard from './components/UserCard';
 
 const App = () => {
-  const token = localStorage.getItem('token'); // Check for token in localStorage
+  const token = localStorage.getItem('token'); 
 
   return (
     <Router>
@@ -15,6 +15,7 @@ const App = () => {
         <Route path="/users" element={token ? <UserList /> : <Navigate to="/" />} />
         <Route path="/edit/:id" element={token ? <EditUser /> : <Navigate to="/" />} />
         <Route path="/user/:id" element={token ? <UserCard /> : <Navigate to="/" />} />
+        <Route path="*" element={token ? <Navigate to="/users" /> : <Navigate to="/" />} />
       </Routes>
     </Router>
   );
